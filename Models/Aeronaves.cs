@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-namespace RegistroAeronaves.Models
+
+namespace Aircraft_Crud.Models
 {
     public class Aeronaves
     {

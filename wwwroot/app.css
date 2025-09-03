@@ -58,3 +58,9 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+
+.card-header.bg-morado,
+thead.bg-morado {
+    background-color: #6f42c1 !important;
+}

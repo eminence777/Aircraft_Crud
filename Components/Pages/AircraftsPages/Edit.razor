@@ -1,0 +1,116 @@
+﻿@page "/Aeronaves/Edit/{AeronavesId:int}"
+@rendermode InteractiveServer
+@inject AeronaveService aeronavesService
+@inject NavigationManager navigation
+
+<PageTitle>Modificar aeronave</PageTitle>
+
+<EditForm Model="aeronaves" OnValidSubmit="Modificar">
+    <DataAnnotationsValidator />
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header bg-warning text-white">
+                <h1><strong>Modificar aeronave</strong></h1>
+            </div>
+            <div class="card-body">
+
+                <!-- Otros campos existentes -->
+                <label for="id" class="form-label"><strong>Aeronave ID</strong></label>
+                <InputNumber id="id" class="form-control" @bind-Value="aeronaves.AeronavesId" readonly></InputNumber>
+
+                <label class="form-label" for="Fecha"><strong>Fecha</strong></label>
+                <InputDate id="Fecha" class="form-control" @bind-Value="aeronaves.Fecha"></InputDate>
+                <ValidationMessage For="@(() => aeronaves.Fecha)"></ValidationMessage>
+
+                <label for="Identificador" class="form-label"><strong>Identificador</strong></label>
+                <InputText id="Identificador" class="form-control" @bind-Value="aeronaves.Identificador"></InputText>
+                <ValidationMessage For="@(() => aeronaves.Identificador)"></ValidationMessage>
+
+                <label for="TipoAeronave" class="form-label"><strong>Tipo aeronave</strong></label>
+                <InputText id="TipoAeronave" class="form-control" @bind-Value="aeronaves.TipoAeronave"></InputText>
+                <ValidationMessage For="@(()=> aeronaves.TipoAeronave)"></ValidationMessage>
+
+                <label for="TipoAeronave" class="form-label"><strong>Categoria</strong></label>
+                <InputText id="TipoAeronave" class="form-control" @bind-Value="aeronaves.categoria"></InputText>
+                <ValidationMessage For="@(()=> aeronaves.TipoAeronave)"></ValidationMessage>
+
+                <label for="Aerolinea" class="form-label"><strong>Aerolinea</strong></label>
+                <InputText id="Aerolinea" class="form-control" @bind-Value="aeronaves.Aerolinea"></InputText>
+                <ValidationMessage For="@(()=> aeronaves.Aerolinea)"></ValidationMessage>
+
+                <label for="Matricula" class="form-label"><strong>Matricula</strong></label>
+                <InputText id="Matricula" class="form-control" @bind-Value="aeronaves.Matricula"></InputText>
+                <ValidationMessage For="@(()=> aeronaves.Matricula)"></ValidationMessage>
+
+                <label for="Ruta" class="form-label"><strong>Ruta</strong></label>
+                <InputText id="Ruta" class="form-control" @bind-Value="aeronaves.ruta"></InputText>
+                <ValidationMessage For="@(()=> aeronaves.ruta)"></ValidationMessage>
+
+                <!-- Imagen -->
+                <label for="imagen" class="form-label"><strong>Imagen</strong></label>
+                <InputFile id="imagen" OnChange="OnInputFileChange" class="form-control" />
+
+                @if (!string.IsNullOrEmpty(imagenPreview))
+                {
+                    <img src="@imagenPreview" alt="Vista previa" class="img-fluid mt-2" style="max-height: 200px;" />
+                }
+
+            </div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-success bi bi-pencil-square"> Modificar</button>
+                <button type="button" class="btn btn-info text-white bi bi-arrow-90deg-left" @onclick="Volver"> Volver</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int AeronavesId { get; set; }
+    public Aeronaves aeronaves { get; set; } = new Aeronaves();
+    private string? imagenPreview;
+    public bool Repetida { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AeronavesId > 0)
+        {
+            aeronaves = await aeronavesService.Buscar(AeronavesId);
+            if (aeronaves.Imagen != null && aeronaves.Imagen.Length > 0)
+            {
+                imagenPreview = $"data:image/jpeg;base64,{Convert.ToBase64String(aeronaves.Imagen)}";
+            }
+        }
+    }
+
+    public async Task<bool> Validar()
+    {
+        var existe = await aeronavesService.ValidarMatricula(aeronaves.Matricula);
+        Repetida = existe == null;
+        return Repetida;
+    }
+
+    public async Task Modificar()
+    {
+        if (!await Validar())
+        {
+            await aeronavesService.Guardar(aeronaves);
+            aeronaves = new Aeronaves();
+            Volver();
+        }
+    }
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        using var memoryStream = new MemoryStream();
+        await file.OpenReadStream(maxAllowedSize: 2 * 1024 * 1024).CopyToAsync(memoryStream);
+        aeronaves.Imagen = memoryStream.ToArray();
+        imagenPreview = $"data:{file.ContentType};base64,{Convert.ToBase64String(aeronaves.Imagen)}";
+    }
+
+    public void Volver()
+    {
+        navigation.NavigateTo("/Aeronaves/Index");
+    }
+}

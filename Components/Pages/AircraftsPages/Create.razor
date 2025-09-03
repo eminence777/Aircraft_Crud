@@ -1,0 +1,118 @@
+﻿@page "/Aeronaves/Create"
+@rendermode InteractiveServer
+@inject AeronaveService aeronaveService
+@inject NavigationManager navigation
+
+<PageTitle>Crear nueva aeronave </PageTitle>
+<EditForm Model="aeronaves" OnValidSubmit="Crear">
+	<DataAnnotationsValidator />
+	<div class="container"></div>
+	<div class="card shadow-lg">
+		<div class="card-header bg-success text-white text-center">
+			<h1><strong>Crear nueva aeronave</strong></h1>
+		</div>
+		@*Body*@
+		<div class="card-body">
+			@*Datos*@
+			<label for="id" class="form-label"><strong>Aeronave ID</strong></label>
+			<InputNumber id="id" class="form-control" @bind-Value="aeronaves.AeronavesId" readonly></InputNumber>
+
+			<label class="form-label" for="Fecha"><strong>Fecha</strong></label>
+			<InputDate id="Fecha" class="form-control" @bind-Value="aeronaves.Fecha"></InputDate>
+			<ValidationMessage For="@(() => aeronaves.Fecha)"></ValidationMessage>
+
+			<label for="id" class="form-label"><strong>Identificador</strong></label>
+			<InputText id="id" class="form-control" @bind-Value="aeronaves.Identificador"></InputText>
+			<ValidationMessage For="@(() => aeronaves.Identificador)"></ValidationMessage>
+
+			<label for="TipoAeronave" class="form-label"><strong>Tipo Aeronave</strong></label>
+			<InputText id="TipoAeronave" class="form-control" @bind-Value="aeronaves.TipoAeronave"></InputText>
+			<ValidationMessage For="@(()=> aeronaves.TipoAeronave)"></ValidationMessage>
+
+			<label for="TipoAeronave" class="form-label"><strong>Categoria</strong></label>
+			<InputText id="TipoAeronave" class="form-control" @bind-Value="aeronaves.categoria"></InputText>
+			<ValidationMessage For="@(()=> aeronaves.TipoAeronave)"></ValidationMessage>
+
+			<label for="Aeroliena" class="form-label"><strong>Aerolinea</strong></label>
+			<InputText id="aerolinea" class="form-control" @bind-Value="aeronaves.Aerolinea"></InputText>
+			<ValidationMessage For="@(()=> aeronaves.Aerolinea)"></ValidationMessage>
+
+			<label for="Matricula" class="form-label"><strong>Matricula</strong></label>
+			<InputText id="Matricula" class="form-control" @bind-Value="aeronaves.Matricula"></InputText>
+			<ValidationMessage For="@(()=> aeronaves.Matricula)"></ValidationMessage>
+
+			<label for="capacidad" class="form-label"><strong>Ruta</strong></label>
+			<InputText id="descripcion" class="form-control" @bind-Value="aeronaves.ruta"></InputText>
+			<ValidationMessage For="@(()=> aeronaves.ruta)"></ValidationMessage>
+
+			<label for="imagen" class="form-label"><strong>Imagen</strong></label>
+			<InputFile id="imagen" OnChange="OnInputFileChange" class="form-control" />
+			@if (!string.IsNullOrEmpty(imagenPreview))
+			{
+				<img src="@imagenPreview" alt="Vista previa" class="img-fluid mt-2" style="max-height: 200px;" />
+			}
+			<ValidationMessage For="@(()=> aeronaves.Imagen)"></ValidationMessage>
+
+
+
+		</div>
+		@*Footer*@
+		<div class=" card-footer">
+			<button type="submit" class="btn btn-primary bi bi-floppy-fill"> Guardar</button>
+			<button type="button" class="btn btn-info text-white bi bi-arrow-90deg-left" @onclick="Volver"> Volver</button>
+		</div>
+	</div>
+
+</EditForm>
+
+
+@code {
+	public Aeronaves aeronaves { get; set; } = new Aeronaves();
+	private string? imagenPreview;
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		aeronaves.Fecha = DateTime.Now;
+	}
+
+
+	public async Task<bool> Validar()
+	{
+		return await aeronaveService.ValidarMatricula(aeronaves.TipoAeronave);
+	}
+
+	public async Task Crear()
+	{
+		if (!await Validar())
+		{
+			await aeronaveService.Guardar(aeronaves);
+			aeronaves = new Aeronaves();
+			navigation.NavigateTo("/Aeronaves/Index");
+		}
+	}
+
+
+	private async Task OnInputFileChange(InputFileChangeEventArgs e)
+	{
+		var file = e.File;
+
+		// Límite recomendado para imágenes (opcional: 2MB)
+		using var memoryStream = new MemoryStream();
+		await file.OpenReadStream(maxAllowedSize: 2 * 1024 * 1024).CopyToAsync(memoryStream);
+		aeronaves.Imagen = memoryStream.ToArray();
+
+		// Vista previa (base64)
+		imagenPreview = $"data:{file.ContentType};base64,{Convert.ToBase64String(aeronaves.Imagen)}";
+	}
+
+
+
+	public void Volver()
+	{
+		navigation.NavigateTo("/Aeronaves/Index");
+
+	}
+
+
+}
