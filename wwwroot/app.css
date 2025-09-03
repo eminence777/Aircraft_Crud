@@ -59,8 +59,24 @@ h1:focus {
     text-align: start;
 }
 
+/* Para el card header */
+.card-header.bg-morado {
+    background-color: #6f42c1 !important;
+    border-color: #6f42c1 !important;
+    color: white !important;
+}
 
-.card-header.bg-morado,
+    .card-header.bg-morado h3 {
+        color: white !important;
+    }
+
+/* Para el thead de la tabla */
 thead.bg-morado {
     background-color: #6f42c1 !important;
 }
+
+    thead.bg-morado tr th {
+        background-color: #6f42c1 !important;
+        border-color: #6f42c1 !important;
+        color: white !important;
+    }
