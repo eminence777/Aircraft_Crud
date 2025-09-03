@@ -92,7 +92,7 @@
 
     public async Task Modificar()
     {
-        if (!await Validar())
+        if (!await Validar()) 
         {
             await aeronavesService.Guardar(aeronaves);
             aeronaves = new Aeronaves();
